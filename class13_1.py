@@ -87,21 +87,89 @@ print(cday)
 
 #datetime转换为str
 #============================================================================
+#如果已经有了datetime对象，要把它格式化为字符串显示给用户，就需要转换为str，
+#转换方法是通过strftime()实现的，同样需要一个日期和时间的格式化字符串：
+from datetime import datetime
+now = datetime.now()
+print(now.strftime('%a, %b %d %H:%M'))
+#Mon, May 05 16:28
+#============================================================================
 
 
+#datetime加减
+#============================================================================
+#对日期和时间进行加减实际上就是把datetime往后或往前计算，得到新的datetime。
+#加减可以直接用+和-运算符，不过需要导入timedelta这个类
+from datetime import datetime, timedelta
+now = datetime.now()
+now
+#datetime.datetime(2015, 5, 18, 16, 57, 3, 540997)
+now + timedelta(hours=10)
+#datetime.datetime(2015, 5, 19, 2, 57, 3, 540997)
+now - timedelta(days=1)
+#datetime.datetime(2015, 5, 17, 16, 57, 3, 540997)
+now + timedelta(days=2, hours=12)
+#datetime.datetime(2015, 5, 21, 4, 57, 3, 540997)
+
+#可见，使用timedelta你可以很容易地算出前几天和后几天的时刻
+#============================================================================
 
 
+#本地时间转换为UTC时间
+#============================================================================
+#本地时间是指系统设定时区的时间，例如北京时间是UTC+8:00时区的时间，而UTC时间指UTC+0:00时区的时间。
+#一个datetime类型有一个时区属性tzinfo，但是默认为None，所以无法区分这个datetime到底是哪个时区，除非强行给datetime设置一个时区
+from datetime import datetime, timedelta, timezone
+tz_utc_8 = timezone(timedelta(hours=8)) # 创建时区UTC+8:00
+now = datetime.now()
+now
+#datetime.datetime(2015, 5, 18, 17, 2, 10, 871012
+
+dt = now.replace(tzinfo=tz_utc_8) # 强制设置为UTC+8:00
+dt
+#datetime.datetime(2015, 5, 18, 17, 2, 10, 871012, tzinfo=datetime.timezone(datetime.timedelta(0, 28800)))
+#如果系统时区恰好是UTC+8:00，那么上述代码就是正确的，否则，不能强制设置为UTC+8:00时区
+#============================================================================
 
 
+#时区转换
+#============================================================================
+#我们可以先通过utcnow()拿到当前的UTC时间，再转换为任意时区的时间：
+#拿到UTC时间，并强制设置时区为UTC+0:00:
+utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
+print(utc_dt)
+#2015-05-18 09:05:12.377316+00:00
+
+# astimezone()将转换时区为北京时间:
+bj_dt = utc_dt.astimezone(timezone(timedelta(hours=8)))
+print(bj_dt)
+#2015-05-18 17:05:12.377316+08:00
+
+#astimezone()将转换时区为东京时间:
+tokyo_dt = utc_dt.astimezone(timezone(timedelta(hours=9)))
+print(tokyo_dt)
+#2015-05-18 18:05:12.377316+09:00
+
+#astimezone()将bj_dt转换时区为东京时间:
+tokyo_dt2 = bj_dt.astimezone(timezone(timedelta(hours=9)))
+print(tokyo_dt2)
+#2015-05-18 18:05:12.377316+09:00
+
+#时区转换的关键在于，拿到一个datetime时，要获知其正确的时区，然后强制设置时区，作为基准时间。
+#利用带时区的datetime，通过astimezone()方法，可以转换到任意时区。
+#注：不是必须从UTC+0:00时区转换到其他时区，任何带时区的datetime都可以正确转换，例如上述bj_dt到tokyo_dt的转换。
+#============================================================================
 
 
+#小结
+#============================================================================
+#atetime表示的时间需要时区信息才能确定一个特定的时间，否则只能视为本地时间。
+#如果要存储datetime，最佳方法是将其转换为timestamp再存储，因为timestamp的值与时区完全无关。
 
-
-
-
-
-
-
+#练习
+#假设你获取了用户输入的日期和时间如2015-1-21 9:01:30，以及一个时区信息如UTC+5:00，
+#均是str，请编写一个函数将其转换为timestamp：
+#============================================================================
 
 
 
